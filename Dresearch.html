@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美国州立学院双录取项目交互式报告 (AI增强版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .nav-link.active {
+            background-color: #0f766e; /* teal-700 */
+            color: white;
+            font-weight: 600;
+        }
+        .accordion-header {
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #f0fdfa; /* teal-50 */
+            border: 1px solid #ccfbf1; /* teal-100 */
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .accordion-content {
+            display: none;
+            padding: 1rem;
+            border: 1px solid #ccfbf1; /* teal-100 */
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700;
+            color: #0f766e; /* teal-700 */
+        }
+        .stat-label {
+            font-size: 0.875rem; /* text-sm */
+            color: #374151; /* gray-700 */
+            margin-top: 0.5rem;
+        }
+        .gemini-button {
+            background-color: #14b8a6; /* teal-500 */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .gemini-button:hover {
+            background-color: #0d9488; /* teal-600 */
+        }
+        .gemini-response-area {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8fafc; /* slate-50 */
+            border: 1px solid #e2e8f0; /* slate-200 */
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #475569; /* slate-600 */
+            white-space: pre-wrap; /* To preserve formatting from Gemini */
+        }
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 0.5rem;
+            color: #0f766e; /* teal-700 */
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800">
+
+    <header class="bg-teal-600 text-white py-6 shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center">美国州立两年制学院面向高中生的双录取项目</h1>
+            <p class="text-center text-sm sm:text-base mt-1 text-teal-100">政策、普及与影响分析交互式报告 (AI增强版)</p>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <ul class="flex flex-wrap justify-center sm:justify-start space-x-2 sm:space-x-4 py-3 text-sm sm:text-base">
+                <li><a class="nav-link active" data-target="overview">概览</a></li>
+                <li><a class="nav-link" data-target="policy">政策解读</a></li>
+                <li><a class="nav-link" data-target="participation">参与数据</a></li>
+                <li><a class="nav-link" data-target="implementation">州级实践</a></li>
+                <li><a class="nav-link" data-target="considerations">核心考量</a></li>
+                <li><a class="nav-link" data-target="conclusion">核心结论</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <section id="overview" class="content-section active">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-6">I. 美国公立两年制学院双录取项目概览</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">A. 双录取的定义及其意义</h3>
+                    <p class="text-stone-700 leading-relaxed">双录取（Dual Enrollment）项目允许高中生在就读高中的同时学习大学程度的课程，并同时获得高中和大学的学分。此类项目为学生提供了接触高等学术工作的机会，有可能缩短其获得高等教育学位的时间，并可能降低总体的大学教育成本。这种教育模式日益成为美国教育体系中连接中学和高等教育的重要桥梁。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">B. 公立两年制学院（社区学院）的核心角色</h3>
+                    <p class="text-stone-700 leading-relaxed">公立两年制学院（社区学院）是全美范围内为高中生提供双录取机会的主要机构。据统计，大约70%的双录取课程是通过社区学院提供的。社区学院在双录取项目中的主导地位，体现了其致力于扩大教育机会和满足社区需求的使命。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">D. 本节核心观点提炼</h3>
+                    <p class="text-stone-700 leading-relaxed">双录取项目并非简单的附加项目，而是日益成为美国教育连续体中不可或缺的一环，它在实践中逐渐消弭了中等教育与高等教育之间的传统界限。社区学院作为双录取项目的主要提供者，这既是其开放入学和响应社区需求使命的体现，也可能在缺乏充分政策与资金支持的情况下对其资源造成压力。考虑到双录取学生在社区学院中的巨大体量（占社区学院课程的70%，占社区学院总入学人数的21%），这意味着巨大的运营和财务投入。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="policy" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-6">II. 双录取的国家政策格局与两年制学院的参与</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">A. 州级双录取政策的广泛采纳</h3>
+                    <p class="text-stone-700 leading-relaxed">美国绝大多数州已经为双录取项目建立了政策框架。截至2022年，已有 <strong class="text-teal-700">48个州和哥伦比亚特区</strong> 制定了州级双录取政策。这种近乎普遍的采纳，凸显了全国范围内对双录取项目价值的认可。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">C. 州政策的细微差别：“有政策”不等于统一实施</h3>
+                    <p class="text-stone-700 leading-relaxed">虽然48个州和哥伦比亚特区均有相关政策，但这些政策的性质和全面性各不相同。一些州在资金、学生资格、课程类型和质量保障等方面的规定可能比其他州更为详尽。例如，宾夕法尼亚州曾被指缺乏州级统筹的双录取项目，而新泽西州则在课程衔接认证和资助政策方面存在不足。这种政策深度的差异可能导致双录取机会和质量方面的不均衡。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">E. 本节核心观点提炼</h3>
+                    <p class="text-stone-700 leading-relaxed">州级双录取政策的广泛采纳标志着全国对早期大学体验益处的共识，而公立两年制学院成为主要推动力量。社区学院招收了约73.5%的双录取学生，是将政策共识转化为学生实际机会的主要渠道。然而，州政策在具体规定上的差异可能导致双录取机会和质量在不同地区呈现不均衡。数据收集方法和政策追踪机制的发展也反映出双录取项目日益增长的重要性。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="participation" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-6">III. 公立两年制学院双录取项目的参与度和范围</h2>
+            <div class="space-y-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-4 text-center">全国参与统计数据 (2022-2023学年)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="stat-card">
+                            <div class="stat-value">约250万</div>
+                            <div class="stat-label">美国参与双录取的总高中生数 (所有类型机构)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">约178万</div>
+                            <div class="stat-label">在公立两年制学院参与双录取的高中生数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">约73.5%</div>
+                            <div class="stat-label">就读于公立两年制学院的双录取学生占所有双录取学生的百分比</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">21%</div>
+                            <div class="stat-label">双录取学生占公立两年制学院总入学人数的百分比 (全国平均)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">37所</div>
+                            <div class="stat-label">双录取学生占总入学人数 ≥ 50% 的公立两年制学院数量</div>
+                        </div>
+                         <div class="stat-card">
+                            <div class="stat-value">爱达荷、印第安纳等</div>
+                            <div class="stat-label">双录取学生占多数或重要部分的州 (示例)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-4 text-center">双录取学生机构分布</h3>
+                    <div class="chart-container mx-auto">
+                        <canvas id="participationChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-stone-600 mt-2">数据显示，绝大多数双录取学生（约73.5%）通过公立两年制学院参与项目。</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">C. 双录取项目领先的州</h3>
+                    <p class="text-stone-700 leading-relaxed">按学生绝对数量计算，双录取项目规模最大的五个州是 <strong class="text-teal-700">加利福尼亚州、得克萨斯州、纽约州、印第安纳州和佛罗里达州</strong>。这五个州合计的双录取学生人数接近90万，约占全国总数的三分之一。鉴于社区学院在全国范围的主导地位，可以推断这些州的大部分双录取学生是通过两年制学院参与的。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">E. 本节核心观点提炼</h3>
+                    <p class="text-stone-700 leading-relaxed">社区学院双录取项目的巨大规模表明，这些项目已在根本上重塑社区学院的身份认同和运营模式。双录取项目在某些州的集中暗示全国平均水平可能掩盖了地区差异。通过改进的IPEDS数据所揭示的双录取项目的快速增长和庞大学生数量，表明以往对早期大学学分积累的理解可能低估了其普遍性和影响。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-6">IV. 州级实施：政策如何在两年制学院转化为具体项目</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">A. 通过州政策进行的普遍促进</h3>
+                    <p class="text-stone-700 leading-relaxed">州政策通过确立双录取制度，从根本上使公立两年制学院得以参与。这些政策通常涵盖资金机制、学生资格标准和课程要求等方面，为两年制学院的参与提供了“游戏规则”。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">C. 地方合作与机构能力</h3>
+                    <p class="text-stone-700 leading-relaxed">即使州政策已经到位，特定两年制学院实际提供双录取项目的情况，往往还取决于学院与K-12学区之间的地方协议。机构能力，包括合格师资的可用性、资源以及基础设施，也发挥着重要作用。州政策是必要的，但并非总是充分的；地方因素是两年制学院层面实际项目实施的关键。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">D. 具有特殊情况或已识别挑战的州案例</h3>
+                    <div class="accordion-container space-y-2">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span>宾夕法尼亚州</span>
+                                <span class="arrow transform transition-transform duration-300">&#9660;</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>在2021-2022年被认为缺乏州级统筹双录取项目，更多依赖个别机构的举措。这表明缺乏统一州框架和资金可能限制项目范围和公平性。</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span>新泽西州</span>
+                                <span class="arrow transform transition-transform duration-300">&#9660;</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>政策允许双录取，但缺乏州级的课程衔接认证和一致的资助方法，导致项目实施存在差异性。</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span>佐治亚州</span>
+                                <span class="arrow transform transition-transform duration-300">&#9660;</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>HB 444法案旨在控制成本，限制部分10年级学生只能在技术学院学习技术课程，显示了州政府如何调整准入条件。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">E. 本节核心观点提炼</h3>
+                    <p class="text-stone-700 leading-relaxed">“有多少州立两年制学院提供双录取项目”的答案并非固定数字，而是反映了赋权性州政策、地方K-12合作及学院能力的动态相互作用。对地方伙伴关系的依赖意味着双录取机会可能在州内也存在不公平。州政府为管理成本或质量所做的努力（如佐治亚州案例）可以直接影响项目提供，增加复杂性。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="considerations" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-6">V. 两年制学院双录取项目的关键考量因素</h2>
+            <div class="accordion-container space-y-2">
+                <div class="accordion-item" id="consideration-funding">
+                    <div class="accordion-header">
+                        <span>A. 资金模式与财务影响</span>
+                        <span class="arrow transform transition-transform duration-300">&#9660;</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-stone-700 leading-relaxed">双录取的资金来源复杂，常涉及州拨款、学区出资、机构补贴和学生付费的混合模式。社区学院通常通过折扣或免费来补贴项目，这可能是一项重大的财务承诺。资金是决定项目可用性、可及性和可持续性的关键因素。对机构补贴的依赖可能引发对长期可持续性和资源公平分配的疑问。</p>
+                        <button class="gemini-button mt-4" data-type="funding">✨ 生成解决方案建议</button>
+                        <div class="loading-indicator" id="loading-funding">正在生成建议...</div>
+                        <div class="gemini-response-area" id="response-funding"></div>
+                    </div>
+                </div>
+                <div class="accordion-item" id="consideration-equity">
+                    <div class="accordion-header">
+                        <span>B. 学生资格与入学机会</span>
+                        <span class="arrow transform transition-transform duration-300">&#9660;</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-stone-700 leading-relaxed">州政策通常规定学生资格。确保所有学生群体，特别是服务不足群体（低收入、少数族裔、第一代大学生）的公平入学机会，是一个主要焦点和挑战。全国数据显示，黑人和西班牙裔学生在双录取项目中的代表性不足。仅仅提供项目是不够的，需要积极主动的策略消除系统性障碍。</p>
+                        <button class="gemini-button mt-4" data-type="equity">✨ 生成解决方案建议</button>
+                        <div class="loading-indicator" id="loading-equity">正在生成建议...</div>
+                        <div class="gemini-response-area" id="response-equity"></div>
+                    </div>
+                </div>
+                <div class="accordion-item" id="consideration-quality">
+                    <div class="accordion-header">
+                        <span>C. 项目质量与师资资格</span>
+                        <span class="arrow transform transition-transform duration-300">&#9660;</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-stone-700 leading-relaxed">保持大学水平课程的严谨性至关重要。州政策和认证机构致力于规范教师资格、课程标准和评估方法。寻找足够数量的合格教师（尤其是在高中授课但由两年制学院认证的课程）可能是一个挑战，特别是在农村地区或高需求领域。这是两年制学院关注的核心问题，可能限制项目的扩展和质量。</p>
+                        <button class="gemini-button mt-4" data-type="quality">✨ 生成解决方案建议</button>
+                        <div class="loading-indicator" id="loading-quality">正在生成建议...</div>
+                        <div class="gemini-response-area" id="response-quality"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-6">VI. 核心结论</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">A. 研究结果总结</h3>
+                    <p class="text-stone-700 leading-relaxed">双录取项目在美国绝大多数州的公立两年制学院中广泛提供。48个州和哥伦比亚特区已制定州级政策支持此类项目。公立两年制学院是主要提供者，在2022-2023学年招收了约178万名高中生（占所有双录取参与者的73.5%，社区学院总入学人数的21%）。尽管无法精确统计每一所提供项目的学院数量，但广泛的州政策和庞大的参与人数证实了绝大多数此类机构的积极参与。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">B. 回应核心问题</h3>
+                    <p class="text-stone-700 leading-relaxed">可以肯定地说，至少在48个州和哥伦比亚特区，州立两年制学院受到州政策的授权，可以向高中生提供双录取项目。证据强烈表明，这些机构中绝大多数确实这样做了，使它们成为全国范围内此类项目的主要接入点。“有多少州立两年制学院提供双录取项目”的答案，更多地是对一种广泛存在的系统性特征的确认，而非一个精确的数字。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-3">C. 前景与启示</h3>
+                    <p class="text-stone-700 leading-relaxed">通过两年制学院实施的双录取项目是美国教育体系中一个不断发展且日益重要的组成部分。对两年制学院而言，双录取项目的深度整合是一把双刃剑：它扩大了早期大学教育的覆盖面，但也对机构在资金、质量保障和公平性方面提出了挑战。持续关注政策制定、确保公平入学、提供可持续资金以及保障项目质量至关重要。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ai-assistant" class="mt-12 bg-white p-6 rounded-lg shadow">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-4">✨ AI 问答助手</h2>
+            <p class="text-stone-700 mb-4">对美国的大学双录取项目有疑问吗？在这里提问，AI助手将尝试为您解答。</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="ai-question" class="block text-sm font-medium text-stone-700">您的问题：</label>
+                    <textarea id="ai-question" rows="3" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2" placeholder="例如：双录取项目对大学申请有什么好处？"></textarea>
+                </div>
+                <button id="ask-gemini-button" class="gemini-button">✨ 提问</button>
+                <div class="loading-indicator" id="loading-ai-qna">正在生成回答...</div>
+                <div class="gemini-response-area" id="response-ai-qna"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-stone-300 py-8 mt-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-sm">信息来源：美国州立两年制学院面向高中生的双录取项目：政策、普及与影响分析报告。</p>
+            <p class="text-xs mt-1">此为基于报告内容的交互式概览。部分内容由 AI 增强。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            function showSection(targetId) {
+                contentSections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+                navLinks.forEach(link => {
+                    if (link.getAttribute('data-target') === targetId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                window.scrollTo(0, 0);
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('data-target');
+                    showSection(targetId);
+                });
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const arrow = header.querySelector('.arrow');
+
+                header.addEventListener('click', () => {
+                    const isVisible = content.style.display === 'block';
+                    content.style.display = isVisible ? 'none' : 'block';
+                    if (arrow) arrow.classList.toggle('rotate-180', !isVisible);
+                });
+            });
+
+            const ctxParticipation = document.getElementById('participationChart');
+            if (ctxParticipation) {
+                new Chart(ctxParticipation, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['公立两年制学院', '其他机构'],
+                        datasets: [{
+                            label: '双录取学生分布',
+                            data: [73.5, 26.5],
+                            backgroundColor: ['#0d9488', '#99f6e4'],
+                            borderColor: ['#0f766e', '#5eead4'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#374151' }},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed !== null) { label += context.parsed + '%'; }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            if (navLinks.length > 0) {
+                 showSection(navLinks[0].getAttribute('data-target'));
+            }
+
+            // Gemini API Integration
+            const apiKey = ""; // Per instructions, leave empty.
+
+            async function callGeminiAPI(prompt, responseElementId, loadingElementId) {
+                const loadingIndicator = document.getElementById(loadingElementId);
+                const responseArea = document.getElementById(responseElementId);
+
+                loadingIndicator.style.display = 'block';
+                responseArea.textContent = '';
+
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('Gemini API Error:', errorData);
+                        throw new Error(`API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        responseArea.textContent = text;
+                    } else {
+                        responseArea.textContent = '未能获取AI建议，请稍后再试。响应结构不符合预期。';
+                        console.error('Unexpected response structure:', result);
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    responseArea.textContent = `获取AI建议时出错：${error.message}。请检查控制台获取更多信息。`;
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                }
+            }
+
+            const considerationButtons = document.querySelectorAll('#considerations .gemini-button');
+            considerationButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    let prompt = "";
+                    const responseId = `response-${type}`;
+                    const loadingId = `loading-${type}`;
+
+                    if (type === 'funding') {
+                        prompt = "针对美国社区学院双录取项目面临的“资金模式与财务影响”挑战，请用中文生成3条富有洞察力的潜在解决思路或改进建议，并简要说明各项的优缺点。✨";
+                    } else if (type === 'equity') {
+                        prompt = "针对美国社区学院双录取项目在“学生资格与入学机会”方面（特别是服务不足群体）的挑战，请用中文生成3条富有洞察力的潜在解决思路或改进建议，并简要说明各项的优缺点。✨";
+                    } else if (type === 'quality') {
+                        prompt = "针对美国社区学院双录取项目在“项目质量与师资资格”方面的挑战，请用中文生成3条富有洞察力的潜在解决思路或改进建议，并简要说明各项的优缺点。✨";
+                    }
+                    
+                    if (prompt) {
+                        callGeminiAPI(prompt, responseId, loadingId);
+                    }
+                });
+            });
+
+            const askGeminiButton = document.getElementById('ask-gemini-button');
+            const aiQuestionInput = document.getElementById('ai-question');
+
+            if (askGeminiButton && aiQuestionInput) {
+                askGeminiButton.addEventListener('click', function() {
+                    const userQuestion = aiQuestionInput.value.trim();
+                    if (!userQuestion) {
+                        document.getElementById('response-ai-qna').textContent = '请输入您的问题。';
+                        return;
+                    }
+                    const prompt = `关于美国的大学双录取项目，请用中文清晰、简洁、分点地回答以下问题：\nQ: ${userQuestion}\nA:`;
+                    callGeminiAPI(prompt, 'response-ai-qna', 'loading-ai-qna');
+                });
+            }
+
+        });
+    </script>
+
+</body>
+</html>
